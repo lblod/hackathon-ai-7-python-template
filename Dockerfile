@@ -1,5 +1,8 @@
-FROM tiangolo/meinheld-gunicorn:python3.8
-MAINTAINER Michaël Dierick "michael@dierick.io"
+FROM python:3.12.3
+MAINTAINER Arne Bertrand "arne.bertrand@redpencil.io"
+
+
+
 
 # Gunicorn Docker config
 ENV MODULE_NAME web
@@ -18,9 +21,13 @@ ENV MU_SPARQL_ENDPOINT 'http://database:8890/sparql'
 ENV MU_SPARQL_UPDATEPOINT 'http://database:8890/sparql'
 ENV MU_APPLICATION_GRAPH 'http://mu.semte.ch/application'
 
+
+
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
+
 ADD . /usr/src/app
+RUN pip3 install uvicorn gunicorn
 
 RUN ln -s /app /usr/src/app/ext \
      && cd /usr/src/app \
@@ -28,7 +35,8 @@ RUN ln -s /app /usr/src/app/ext \
 
 ONBUILD ADD Dockerfile requirement[s].txt /app/
 ONBUILD RUN cd /app/ \
-    && if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    && if [ -f requirements.txt ]; then pip install --upgrade -r requirements.txt; fi
 
 ONBUILD ADD . /app/
 ONBUILD RUN touch /app/__init__.py
+ENTRYPOINT ["/start.sh"]
